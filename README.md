@@ -93,5 +93,18 @@ we could use ABAC to implement access control for any of the following:
 
 - free vs paid tiers - e.g "a user can access these features is he is a paid subscriber".
 
-- hierarchies - e.g
+- hierarchies - e.g., "a user can view this data if he owns it of if he manages an employee that owns it".
 
+- imporsonation - e.g., "a user can view this data if he owns it of if he is a support engineer with permission to impersonate that use at this time".
+
+a basic ABAC implementation is a simple if statement that checks if a user is a file's owner.
+
+ABAC is a superset of RBAC. Whereas RBAC is a 2D model that maps roles to a set of permissions, ABAC is multi-dimensional. So to implement an ABAC system, we need an interface that helps us express a potentially broader variety of rules about who can do what - specifically, we need one that lets us map both attributes on the user and atrributes on the resource.
+
+we can achieve this in a few different ways:
+
+- data in a database - we implement permissions by specifying constraints on the query - e.g., **WHERE resource.owner_id = ?** - or as a seperate check in the application after data has been accessed.
+
+- fields from a token - we pass around cryptographic tokens (e.g., JWTs) containing information about the user and what she can do. Application code or proxies check for the presence of correct fields on the token. For example, it might check that a token has the correct scope - e.g., **"read:account" in token.scopes**.
+
+- policy engine - we express authorization logic using a policy language, and evaluate it over trhe relevant input data. For instance, if we're checking edit privileges on a file, we might be checking the metadata of that file to see if the user owns it. We might pass in the data manually, or pull it in from application context or a database. This approach lets us write fine-grained rules for what data the user is authorized to see, expressed as a function over the input data. This way, we keep the authorization logic seperate from the business logic, and we have a single place to manage access rules.
